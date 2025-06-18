@@ -7,16 +7,17 @@ import openpyxl.workbook
 
 # --Functions--
 # Excel File Creation
-def file_creation(folder, file):
+def file_creation(path):
   crntfile = Workbook()
-  crntfile.save(os.path.join(folder, file))
+  crntfile.save(path)
   print('A new excel sheet has been created.')
   return crntfile
 
 # Excel File Appending
-def file_append(folder, file):
-  crntfile = openpyxl.workbook.load(os.path.join(folder, file))
+def file_append(path):
+  crntfile = openpyxl.workbook.load(path)
   print('The existing excel sheet will now be modified.')
+  file_exist = True
   return crntfile
 
 #Title
@@ -32,10 +33,17 @@ if diffdate.upper() == 'Y':
 # File Existence Check
 filename = f'{trgtdate}-expenses.xlsx'
 foldername = 'Daily-Income-Expense-Sheets'
-filepath = f'./{foldername}/{filename}'
+filepath = os.path.join(foldername, filename)
+file_exist = False
 if os.path.exists(filepath) and os.path.isfile(filepath):
-  currentfile = file_append(foldername, filename) # Append file since file exists
+  currentfile = file_append(filepath) # Append file since file exists
 else:
-  currentfile = file_creation(foldername, filename) # Create file since file does not exist
+  currentfile = file_creation(filepath) # Create file since file does not exist
 
-# Records
+# Default Header Writing
+ws = currentfile.active
+headertitles = ['Time', 'Description', 'Category', 'Income', 'Expense']
+if file_exist is False:
+  for i in range(5):
+    ws.cell(row=1, column = i+1, value = headertitles[i])
+  currentfile.save(filepath)
