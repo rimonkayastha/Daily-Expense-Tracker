@@ -32,7 +32,7 @@ def add_record():
     current_datetime = datetime.now()
     time_input = current_datetime.strftime("%H:%M")
   input_list.append(time_input)
-  for i in range(len(headertitles)-1):
+  for i in range(len(headertitles)-2):
     user_input = input(f'Enter the {headertitles[i+1]} if applicable: ')
     input_list.append(user_input)
   input_tuple = (input_list)
@@ -61,9 +61,9 @@ else:
 
 # Default Header Writing
 ws = currentfile.active
-headertitles = ['Time', 'Description', 'Category', 'Income', 'Expense']
+headertitles = ['Time', 'Description', 'Category', 'Income', 'Expense', 'Balance']
 if file_exist is False:
-  for i in range(5):
+  for i in range(6):
     ws.cell(row=1, column = i+1, value = headertitles[i])
   currentfile.save(filepath)
   
@@ -72,7 +72,11 @@ print(ws.max_row)
 recordask = input('Would you like to enter a new record (Y/N)? ')
 while recordask.upper() == 'Y':
   add_record()
-  # ws.cell(row=ws.max_row, column=ws.max_column, value=((int(ws.cell(row=ws.max_row, column=4).value) - int(ws.cell(row=ws.max_row, column=5).value)) + int(ws.cell(row=ws.max_row - 1, column=ws.max_column).value))) #Code not working for some reason
+  if ws.max_row==2:
+    ws.cell(row=ws.max_row, column=6, value=(int(ws.cell(row=ws.max_row, column=4).value) - int(ws.cell(row=ws.max_row, column=5).value)))
+  else:
+    ws.cell(row=ws.max_row, column=6, value=(int(ws.cell(row=ws.max_row, column=4).value) - int(ws.cell(row=ws.max_row, column=5).value) + int(ws.cell(row=ws.max_row - 1, column=6).value)))
+  currentfile.save(filepath)
   recordask = input('Would you like to enter a new record (Y/N)? ')
 
 
