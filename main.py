@@ -1,11 +1,13 @@
 #Libraries
 from datetime import date
-from datetime import time
 from datetime import datetime
 import os
 import openpyxl
 from openpyxl import Workbook
 import openpyxl.workbook
+from openpyxl.styles import Font
+from openpyxl.styles import PatternFill
+from openpyxl.styles import Border, Side
 
 # --Functions--
 # Excel File Creation
@@ -51,6 +53,9 @@ def stats():
 
   print(f'As of now, the total income is {Total_Income}, the total expense is {Total_Expense} and the net balance is {Net_Balance}')
 
+#Border preset 
+borders = Side(border_style="thin", color="000000")
+
 #Title
 Titlestr = 'DAILY EXPENSE TRACKER'
 trgtdate = date.today()
@@ -77,6 +82,11 @@ while diffdate.upper() == 'Y':
   if file_exist is False:
     for i in range(6):
       ws.cell(row=1, column = i+1, value = headertitles[i])
+      ws.cell(row=1, column = i+1).font = Font(bold=True)
+      ws.cell(row=1, column = i+1).fill = PatternFill('solid', start_color="808080")
+      ws.cell(row=1, column = i+1).border = Border(
+        top = borders, left = borders, right = borders, bottom = borders
+      )
     currentfile.save(filepath)
     
   # Record
