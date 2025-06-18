@@ -2,6 +2,25 @@
 from datetime import date
 import os
 
+# --Functions--
+# Excel File Creation
+def file_creation(folder, file):
+  crntfile = open(os.path.join(folder, file), 'x')
+  print('A new excel sheet has been created.')
+  return crntfile
+
+# Excel File Appending
+def file_append(folder, file):
+  filecreate = input('Would you like to overwrite (O) or add to the existing file (A)? ')
+  if filecreate.upper() == 'O':
+    crntfile = open(os.path.join(folder, file), 'w')
+    print('The existing excel sheet will now be overwritten.')
+  elif filecreate.upper() == 'A':
+    crntfile = open(os.path.join(folder, file), 'a')
+    print('The existing excel sheet will now be modified.')
+  return crntfile
+    
+
 #Title
 Titlestr = 'DAILY EXPENSE TRACKER'
 trgtdate = date.today()
@@ -14,10 +33,9 @@ if diffdate.upper() == 'Y':
 
 # File Existence Check
 filename = f'{trgtdate}-expenses.xlsx'
-filepath = f'./Daily-Income-Expense-Sheets/{filename}'
+foldername = 'Daily-Income-Expense-Sheets'
+filepath = f'./{foldername}/{filename}'
 if os.path.exists(filepath) and os.path.isfile(filepath):
-  print('Already Exists!')
+  currentfile = file_append(foldername, filename)
 else:
-  print('Does not Exist')
-
-#Functions
+  currentfile = file_creation(foldername, filename)
