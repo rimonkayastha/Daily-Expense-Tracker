@@ -44,25 +44,31 @@ def add_record():
   for i in range(len(headertitles)-2):
     user_input = input(f'Enter the {headertitles[i+1]} if applicable: ')
     if i in [2,3]:
-      while not user_input.isnumeric():
-        print('The input should be a number')
-        user_input = input(f'Enter the {headertitles[i+1]} if applicable: ')
+      y = False 
+      while y == False:
+        try:
+          user_input = float(user_input)
+          y = True
+        except:
+          print('Enter a number!')
+          user_input = input(f'Enter the {headertitles[i+1]} if applicable: ')
     input_list.append(user_input)
   input_tuple = (input_list)
   ws.append(input_tuple)
   currentfile.save(filepath)
   
-# Income, Expense, Balance stats display
+# Income, Expense, Balance stats store
 def stats():
   Total_Income = 0
-  for i in range(2, ws.max_row+1):
-    Total_Income = Total_Income + int(ws.cell(row=i, column = 4).value)
+  for i in range(2, ws.max_row):
+    Total_Income = Total_Income + float(ws.cell(row=i, column = 4).value)
+    ws.cell(row=ws.max_row, column = 4, value=Total_Income)
   Total_Expense = 0
-  for i in range(2, ws.max_row+1):
-    Total_Expense = Total_Expense + int(ws.cell(row=i, column = 5).value)
-  Net_Balance = int(ws.cell(row=ws.max_row, column = ws.max_column).value)
-
-  print(f'As of now, the total income is {Total_Income}, the total expense is {Total_Expense} and the net balance is {Net_Balance}')
+  for i in range(2, ws.max_row):
+    Total_Expense = Total_Expense + float(ws.cell(row=i, column = 5).value)
+    ws.cell(row=ws.max_row, column = 5, value=Total_Expense)
+  Net_Balance = float(ws.cell(row=ws.max_row-1, column = ws.max_column).value)
+  ws.cell(row=ws.max_row, column = 6, value=Net_Balance)
 
 #Border preset 
 borders = Side(border_style="thin", color="000000")
@@ -74,18 +80,22 @@ date_pattern = r'(\d\d\d\d)-(\d\d)-(\d\d)'
 #Title
 Titlestr = 'DAILY EXPENSE TRACKER'
 trgtdate = date.today()
-print(f"\n{Titlestr:-^70} \nToday's Date: {trgtdate}")
+print(f"\n{Titlestr:-^70} \nToday's Date: {trgtdate}\n")
 
 #Optional Date Input
-diffdate = input("Would you like to manage or track income/expenses for a different date (Y/N)? ")
-while diffdate.upper() != 'Y' and diffdate.upper() != 'N':
-  print('Enter Y or N! ')
+answer = True
+while answer == True:
+  trgtdate = str(trgtdate)
   diffdate = input("Would you like to manage or track income/expenses for a different date (Y/N)? ")
-while diffdate.upper() == 'Y':
-  trgtdate = input('Enter target date in YYYY-MM-DD format (Include \'-\'): ')
+  while diffdate.upper() != 'Y' and diffdate.upper() != 'N':
+    print('Enter Y or N! ')
+    diffdate = input("Would you like to manage or track income/expenses for a different date (Y/N)? ")
+  if diffdate.upper() == 'Y':
+    trgtdate = input('Enter target date in YYYY-MM-DD format (Include \'-\'): ')
   while not re.match(date_pattern, trgtdate):
       print('Wrong Format! ')
       trgtdate = input('Enter target date in YYYY-MM-DD format (Include \'-\'): ')
+      
   # File Existence Check
   filename = f'{trgtdate}-expenses.xlsx'
   foldername = 'Daily-Income-Expense-Sheets'
@@ -115,11 +125,18 @@ while diffdate.upper() == 'Y':
     print('Enter Y or N! ')
     recordask = input('Would you like to enter a new record (Y/N)? ')
   while recordask.upper() == 'Y':
+    if ws.max_row != 1:
+      ws.delete_rows(ws.max_row, 1)
+      currentfile.save(filepath)
     add_record()
     if ws.max_row==2:
-      ws.cell(row=ws.max_row, column=6, value=(int(ws.cell(row=ws.max_row, column=4).value) - int(ws.cell(row=ws.max_row, column=5).value)))
+      ws.cell(row=ws.max_row, column=6, value=(float(ws.cell(row=ws.max_row, column=4).value) - float(ws.cell(row=ws.max_row, column=5).value)))
     else:
-      ws.cell(row=ws.max_row, column=6, value=(int(ws.cell(row=ws.max_row, column=4).value) - int(ws.cell(row=ws.max_row, column=5).value) + int(ws.cell(row=ws.max_row - 1, column=6).value)))
+      ws.cell(row=ws.max_row, column=6, value=(float(ws.cell(row=ws.max_row, column=4).value) - float(ws.cell(row=ws.max_row, column=5).value) + float(ws.cell(row=ws.max_row - 1, column=6).value)))
+    currentfile.save(filepath)
+    ws.cell(row=ws.max_row+1, column = 1, value = 'Total: ')
+    currentfile.save(filepath)
+    stats()
     currentfile.save(filepath)
     recordask = input('Would you like to enter a new record (Y/N)? ')
     while recordask.upper() != 'Y' and recordask.upper() != 'N':
@@ -133,13 +150,16 @@ while diffdate.upper() == 'Y':
     statsask = input('Would you like to view the total income, total expenses and net balance for this day (Y/N)? ')
      
   if statsask.upper() == 'Y':
-    stats()
+    print(f'As of now, the total income is {float(ws.cell(row=ws.max_row, column=4).value)}, the total expense is {float(ws.cell(row=ws.max_row, column=5).value)} and the total balance is {float(ws.cell(row=ws.max_row, column=6).value)}')
 
-
-  diffdate = input("Would you like to manage or track income/expenses for a different date (Y/N)? ")
-  while diffdate.upper() != 'Y' and diffdate.upper() != 'N':
+  user_answer = input('Would you like to exit (Y/N)? ')
+  while user_answer.upper() != 'Y' and user_answer.upper() != 'N':
     print('Enter Y or N! ')
-    diffdate = input("Would you like to manage or track income/expenses for a different date (Y/N)? ")
+    user_answer = input('Would you like to exit (Y/N)? ')
+  if user_answer.upper() == 'Y':
+    answer = False
+  else:
+    print(f"\nToday's Date: {trgtdate}\n")
 
 #Ending Message
 print('The application has closed.')
